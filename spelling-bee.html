@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#667eea">
+  <title>Spelling Bee</title>
+  <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.app {
+  background: white;
+  border-radius: 30px;
+  padding: 40px 30px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.title-screen h1 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.title-bee {
+  font-size: 4rem;
+  display: block;
+  margin: 10px 0 20px;
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+
+.level-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.level-btn {
+  padding: 18px 30px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  color: white;
+}
+
+.level-btn:active {
+  transform: scale(0.95);
+}
+
+.level-btn.easy {
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  box-shadow: 0 6px 20px rgba(67, 233, 123, 0.4);
+}
+
+.level-btn.medium {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  box-shadow: 0 6px 20px rgba(253, 160, 133, 0.4);
+}
+
+.level-btn.hard {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+}
+
+.level-btn.tricky {
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+  box-shadow: 0 6px 20px rgba(161, 140, 209, 0.4);
+}
+
+.level-btn.tricky::after {
+  content: ' \u2728';
+}
+
+.level-btn.weak {
+  background: linear-gradient(135deg, #f5576c, #ff6b6b);
+  box-shadow: 0 6px 20px rgba(245, 87, 108, 0.4);
+  position: relative;
+}
+
+.badge {
+  display: inline-block;
+  background: white;
+  color: #f5576c;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-left: 8px;
+}
+
+.reset-btn {
+  margin-top: 20px;
+  padding: 8px 16px;
+  font-size: 0.8rem;
+  border: none;
+  background: none;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.reset-btn:active {
+  color: #999;
+}
+
+.tricky-menu-screen {
+  display: none;
+}
+
+.tricky-menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tricky-menu-header h2 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.tricky-menu-subtitle {
+  color: #888;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+}
+
+.category-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border: 2px solid #eee;
+  border-radius: 16px;
+  background: white;
+  cursor: pointer;
+  transition: transform 0.15s, border-color 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.category-btn:active {
+  transform: scale(0.97);
+}
+
+.category-btn:hover {
+  border-color: #a18cd1;
+}
+
+.cat-icon {
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  width: 44px;
+  text-align: center;
+}
+
+.cat-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cat-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.cat-count {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.cat-mastery {
+  flex-shrink: 0;
+  width: 70px;
+  text-align: center;
+}
+
+.mastery-bar {
+  display: flex;
+  width: 100%;
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 3px;
+}
+
+.mastery-fill {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.mastery-mastered { background: #43e97b; }
+.mastery-learning { background: #f6d365; }
+.mastery-struggling { background: #f5576c; }
+
+.mastery-label {
+  font-size: 0.7rem;
+  color: #999;
+}
+
+.game-screen { display: none; }
+
+.game-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.back-btn {
+  background: #eee;
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-display {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.mastery-indicator {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 10px;
+}
+
+.mastery-new { background: #eee; color: #888; }
+.mastery-struggling-badge { background: #fde8ec; color: #f5576c; }
+.mastery-learning-badge { background: #fef9e7; color: #e67e22; }
+.mastery-mastered-badge { background: #e8fdf0; color: #27ae60; }
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #eee;
+  border-radius: 6px;
+  margin-bottom: 30px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #43e97b, #38f9d7);
+  border-radius: 6px;
+  transition: width 0.4s ease;
+}
+
+.word-area { margin: 30px 0; }
+
+.listen-btn {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  font-size: 2.5rem;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+  transition: transform 0.15s;
+  margin-bottom: 10px;
+}
+
+.listen-btn:active { transform: scale(0.9); }
+
+.listen-label {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 25px;
+}
+
+.hint-text {
+  font-size: 1rem;
+  color: #aaa;
+  margin-bottom: 20px;
+  min-height: 1.5em;
+}
+
+.letter-input-area {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 25px;
+  min-height: 60px;
+}
+
+.letter-box {
+  width: 48px;
+  height: 56px;
+  border: 3px solid #ddd;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  outline: none;
+  transition: border-color 0.2s, transform 0.2s;
+  -webkit-appearance: none;
+  color: #333;
+  background: #fafafa;
+}
+
+.letter-box:focus {
+  border-color: #667eea;
+  transform: scale(1.08);
+  background: white;
+}
+
+.letter-box.correct {
+  border-color: #43e97b;
+  background: #e8fdf0;
+  animation: pop 0.3s ease;
+}
+
+.letter-box.wrong {
+  border-color: #f5576c;
+  background: #fde8ec;
+  animation: shake 0.4s ease;
+}
+
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+.check-btn {
+  padding: 16px 50px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  transition: transform 0.15s;
+}
+
+.check-btn:active { transform: scale(0.95); }
+.check-btn:disabled { opacity: 0.5; cursor: default; }
+
+.pattern-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 15px;
+}
+
+.letter-box.tricky-letter { border-color: #a18cd1; border-style: dashed; }
+
+.letter-box.tricky-revealed {
+  background: #f3e8ff;
+  border-color: #a18cd1;
+  border-style: solid;
+  color: #7c3aed;
+  animation: pop 0.3s ease;
+}
+
+.letter-box.tricky-highlight-correct {
+  border-color: #7c3aed;
+  background: #f3e8ff;
+  animation: trickyGlow 1s ease infinite;
+}
+
+@keyframes trickyGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 18px rgba(124, 58, 237, 0.6); }
+}
+
+.rule-hint {
+  display: block;
+  margin-top: 6px;
+  color: #7c3aed;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.hint-btn {
+  display: block;
+  margin: 15px auto 0;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  background: white;
+  color: #888;
+  cursor: pointer;
+}
+
+.tricky-reveal-btn {
+  display: block;
+  margin: 10px auto 0;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  border: 2px solid #a18cd1;
+  border-radius: 10px;
+  background: #f3e8ff;
+  color: #7c3aed;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.feedback {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  animation: fadeIn 0.3s ease;
+  padding: 20px;
+}
+
+.feedback.correct-feedback { background: rgba(67, 233, 123, 0.95); }
+.feedback.wrong-feedback { background: rgba(245, 87, 108, 0.95); }
+
+.feedback-emoji { font-size: 5rem; margin-bottom: 15px; }
+
+.feedback-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.feedback-word {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 15px;
+}
+
+.feedback-tricky-letter {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin: 0 1px;
+  border-bottom: 3px solid rgba(255, 255, 255, 0.7);
+  font-weight: 800;
+}
+
+.feedback-streak {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 6px 18px;
+  border-radius: 20px;
+  margin-bottom: 10px;
+}
+
+.feedback-rule {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 10px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  max-width: 350px;
+}
+
+.feedback-continue {
+  padding: 14px 40px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 15px;
+  background: white;
+  color: #333;
+  cursor: pointer;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.results-screen { display: none; }
+.results-emoji { font-size: 5rem; margin-bottom: 10px; }
+.results-screen h2 { font-size: 2rem; color: #333; margin-bottom: 5px; }
+
+.results-score {
+  font-size: 3rem;
+  font-weight: 800;
+  color: #667eea;
+  margin: 15px 0;
+}
+
+.results-message { font-size: 1.1rem; color: #888; margin-bottom: 10px; }
+
+.results-details {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin: 20px 0 30px;
+}
+
+.result-stat { text-align: center; }
+.result-stat .number { font-size: 2rem; font-weight: 800; }
+.result-stat .label { font-size: 0.85rem; color: #888; }
+.result-stat.correct-stat .number { color: #43e97b; }
+.result-stat.wrong-stat .number { color: #f5576c; }
+
+#mastery-summary { margin: 10px 0 20px; }
+
+.mastery-summary-bar {
+  width: 80%;
+  height: 12px;
+  background: #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0 auto 8px;
+}
+
+.mastery-summary-bar .mastery-fill { height: 100%; }
+.mastery-summary-text { font-size: 0.9rem; color: #888; }
+
+.play-again-btn {
+  padding: 16px 50px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  margin-bottom: 10px;
+}
+
+.missed-words { margin-top: 20px; text-align: left; }
+.missed-words h3 { font-size: 1rem; color: #888; margin-bottom: 10px; }
+
+.missed-word-item {
+  padding: 10px 15px;
+  background: #fde8ec;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.missed-word-item .correct-spelling { font-weight: 700; color: #43e97b; }
+.missed-word-item .tricky-highlight { color: #7c3aed; font-weight: 800; border-bottom: 2px solid #7c3aed; }
+.missed-pattern { font-size: 0.8rem; color: #7c3aed; font-weight: 600; margin-top: 3px; }
+
+@media (min-width: 768px) {
+  .app { max-width: 550px; padding: 50px 40px; }
+  .title-screen h1 { font-size: 3rem; }
+  .letter-box { width: 55px; height: 64px; font-size: 1.8rem; }
+}
+  </style>
+</head>
+<body>
+  <div class="app">
+
+    <!-- Title Screen -->
+    <div class="title-screen" id="title-screen">
+      <h1>Spelling Bee</h1>
+      <span class="title-bee">&#x1F41D;</span>
+      <p style="color: #888; margin-bottom: 10px;">Listen, spell, and learn!</p>
+      <div class="level-buttons">
+        <button class="level-btn easy" onclick="startGame('easy')">Easy</button>
+        <button class="level-btn medium" onclick="startGame('medium')">Medium</button>
+        <button class="level-btn hard" onclick="startGame('hard')">Hard</button>
+        <button class="level-btn tricky" onclick="startGame('tricky')">Tricky Words</button>
+        <button class="level-btn weak" id="weak-words-btn" style="display: none;" onclick="startGame('weak')">
+          Practice Weak Words <span class="weak-count badge">0</span>
+        </button>
+      </div>
+      <button class="reset-btn" onclick="resetProgress()">Reset Progress</button>
+    </div>
+
+    <!-- Tricky Words Submenu -->
+    <div class="tricky-menu-screen" id="tricky-menu-screen" style="display: none;">
+      <div class="tricky-menu-header">
+        <button class="back-btn" onclick="goHome()">&#x2190;</button>
+        <h2>Tricky Words</h2>
+        <span></span>
+      </div>
+      <p class="tricky-menu-subtitle">Pick a category or practice them all!</p>
+      <div class="category-list" id="tricky-category-list"></div>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-screen" id="game-screen" style="display: none;">
+      <div class="game-header">
+        <button class="back-btn" onclick="goHome()">&#x2190;</button>
+        <span class="mastery-indicator" id="mastery-indicator"></span>
+        <span class="score-display" id="score-display">Score: 0 / 10</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+
+      <div class="word-area">
+        <button class="listen-btn" id="listen-btn">&#x1F50A;</button>
+        <p class="listen-label">Tap to hear the word</p>
+        <span class="pattern-badge" id="pattern-badge" style="display: none;"></span>
+        <p class="hint-text" id="hint-text"></p>
+      </div>
+
+      <div class="letter-input-area" id="letter-input-area"></div>
+
+      <button class="check-btn" id="check-btn">Check!</button>
+      <button class="hint-btn" id="hint-btn">Show Hint</button>
+      <button class="tricky-reveal-btn" id="tricky-btn" style="display: none;" onclick="showTrickyLetters()">Show Tricky Letters</button>
+    </div>
+
+    <!-- Results Screen -->
+    <div class="results-screen" id="results-screen" style="display: none;">
+      <div class="results-emoji" id="results-emoji"></div>
+      <h2 id="results-title">Great Job!</h2>
+      <div class="results-score" id="results-score">0 / 10</div>
+      <p class="results-message" id="results-message"></p>
+
+      <div class="results-details">
+        <div class="result-stat correct-stat">
+          <div class="number" id="correct-count">0</div>
+          <div class="label">Correct</div>
+        </div>
+        <div class="result-stat wrong-stat">
+          <div class="number" id="wrong-count">0</div>
+          <div class="label">Missed</div>
+        </div>
+      </div>
+
+      <div id="mastery-summary" style="display: none;"></div>
+
+      <button class="play-again-btn" onclick="goHome()">Play Again</button>
+
+      <div class="missed-words" id="missed-words" style="display: none;">
+        <h3>Words to Practice:</h3>
+        <div id="missed-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+const TRICKY_CATEGORIES = {
+  'silent-letters': { name: 'Silent Letters', icon: '\uD83E\uDD2B', color: '#e74c3c' },
+  'ough': { name: 'OUGH Words', icon: '\uD83E\uDD2F', color: '#9b59b6' },
+  'double-letters': { name: 'Double Letters', icon: '\u270C\uFE0F', color: '#e67e22' },
+  'ie-ei': { name: 'IE vs EI', icon: '\uD83D\uDD00', color: '#2ecc71' },
+  'ph-f': { name: 'PH = F', icon: '\uD83D\uDCDE', color: '#3498db' },
+  'other': { name: 'Other Tricky', icon: '\uD83C\uDF00', color: '#e91e63' },
+};
+
+const WORDS = {
+  easy: [
+    { word: 'cat', hint: 'A furry pet that says meow' },
+    { word: 'dog', hint: 'A loyal pet that barks' },
+    { word: 'sun', hint: 'It shines in the sky' },
+    { word: 'hat', hint: 'You wear it on your head' },
+    { word: 'red', hint: 'The color of a fire truck' },
+    { word: 'big', hint: 'The opposite of small' },
+    { word: 'run', hint: 'Moving very fast on your feet' },
+    { word: 'cup', hint: 'You drink water from it' },
+    { word: 'bed', hint: 'You sleep on it' },
+    { word: 'map', hint: 'It shows you where to go' },
+    { word: 'fish', hint: 'It swims in water' },
+    { word: 'ball', hint: 'Round toy you can throw' },
+    { word: 'tree', hint: 'It has leaves and branches' },
+    { word: 'book', hint: 'You read stories in it' },
+    { word: 'frog', hint: 'A green animal that jumps' },
+  ],
+  medium: [
+    { word: 'happy', hint: 'Feeling great and joyful' },
+    { word: 'apple', hint: 'A red or green fruit' },
+    { word: 'house', hint: 'A place where people live' },
+    { word: 'green', hint: 'The color of grass' },
+    { word: 'water', hint: 'You drink it when thirsty' },
+    { word: 'smile', hint: 'What you do when you are happy' },
+    { word: 'cloud', hint: 'White and fluffy in the sky' },
+    { word: 'party', hint: 'A fun celebration' },
+    { word: 'tiger', hint: 'A big striped wild cat' },
+    { word: 'lemon', hint: 'A sour yellow fruit' },
+    { word: 'piano', hint: 'A musical instrument with keys' },
+    { word: 'robot', hint: 'A machine that can move' },
+    { word: 'queen', hint: 'A royal woman who rules' },
+    { word: 'river', hint: 'A long flowing body of water' },
+    { word: 'ghost', hint: 'A spooky spirit' },
+  ],
+  hard: [
+    { word: 'because', hint: 'It gives a reason why' },
+    { word: 'thought', hint: 'An idea in your mind' },
+    { word: 'through', hint: 'Going from one side to the other' },
+    { word: 'enough', hint: 'As much as you need' },
+    { word: 'friend', hint: 'Someone you like to play with' },
+    { word: 'people', hint: 'Human beings, like you and me' },
+    { word: 'animal', hint: 'A living creature' },
+    { word: 'school', hint: 'Where you go to learn' },
+    { word: 'island', hint: 'Land surrounded by water' },
+    { word: 'knight', hint: 'A warrior in shining armor' },
+    { word: 'castle', hint: 'Where a king or queen lives' },
+    { word: 'jungle', hint: 'A thick tropical forest' },
+    { word: 'banana', hint: 'A long yellow fruit' },
+    { word: 'rocket', hint: 'It flies into space' },
+    { word: 'circus', hint: 'A show with clowns and acrobats' },
+  ],
+  tricky: [
+    { word: 'knife', hint: 'You cut with it', tricky: [0], pattern: 'Silent K', rule: 'The "k" is silent before "n"', category: 'silent-letters' },
+    { word: 'knight', hint: 'A warrior in shining armor', tricky: [0], pattern: 'Silent K', rule: 'The "k" is silent before "n"', category: 'silent-letters' },
+    { word: 'knock', hint: 'Tap on a door', tricky: [0], pattern: 'Silent K', rule: 'The "k" is silent before "n"', category: 'silent-letters' },
+    { word: 'write', hint: 'Use a pencil to do this', tricky: [0], pattern: 'Silent W', rule: 'The "w" is silent before "r"', category: 'silent-letters' },
+    { word: 'wrong', hint: 'Not right', tricky: [0], pattern: 'Silent W', rule: 'The "w" is silent before "r"', category: 'silent-letters' },
+    { word: 'wrap', hint: 'Cover a gift with paper', tricky: [0], pattern: 'Silent W', rule: 'The "w" is silent before "r"', category: 'silent-letters' },
+    { word: 'lamb', hint: 'A baby sheep', tricky: [3], pattern: 'Silent B', rule: 'The "b" is silent after "m"', category: 'silent-letters' },
+    { word: 'comb', hint: 'Used to fix your hair', tricky: [3], pattern: 'Silent B', rule: 'The "b" is silent after "m"', category: 'silent-letters' },
+    { word: 'thumb', hint: 'The short finger on your hand', tricky: [4], pattern: 'Silent B', rule: 'The "b" is silent after "m"', category: 'silent-letters' },
+    { word: 'island', hint: 'Land surrounded by water', tricky: [1], pattern: 'Silent S', rule: 'The "s" is silent in this word', category: 'silent-letters' },
+    { word: 'listen', hint: 'Use your ears to do this', tricky: [3], pattern: 'Silent T', rule: 'The "t" is silent in this word', category: 'silent-letters' },
+    { word: 'castle', hint: 'Where a king lives', tricky: [3], pattern: 'Silent T', rule: 'The "t" is silent in this word', category: 'silent-letters' },
+    { word: 'whistle', hint: 'Make a sound with your lips', tricky: [4], pattern: 'Silent T', rule: 'The "t" is silent in this word', category: 'silent-letters' },
+    { word: 'though', hint: 'Even if, however', tricky: [2,3,4,5], pattern: 'OUGH = "oh"', rule: '"ough" sounds like "oh" here', category: 'ough' },
+    { word: 'through', hint: 'Going from one side to the other', tricky: [2,3,4,5,6], pattern: 'OUGH = "oo"', rule: '"ough" sounds like "oo" here', category: 'ough' },
+    { word: 'enough', hint: 'As much as you need', tricky: [2,3,4,5], pattern: 'OUGH = "uff"', rule: '"ough" sounds like "uff" here', category: 'ough' },
+    { word: 'thought', hint: 'An idea in your mind', tricky: [2,3,4,5,6], pattern: 'OUGH = "aw"', rule: '"ough" sounds like "aw" here', category: 'ough' },
+    { word: 'cough', hint: 'When you are sick you do this', tricky: [1,2,3,4], pattern: 'OUGH = "off"', rule: '"ough" sounds like "off" here', category: 'ough' },
+    { word: 'scissors', hint: 'You cut paper with these', tricky: [1,2], pattern: 'Double letter + silent C', rule: '"sc" makes an "s" sound, the "c" is silent', category: 'double-letters' },
+    { word: 'balloon', hint: 'It floats when filled with air', tricky: [2,3,4,5], pattern: 'Double L and double O', rule: 'Remember: two L\'s and two O\'s', category: 'double-letters' },
+    { word: 'broccoli', hint: 'A green vegetable like a tiny tree', tricky: [2,3], pattern: 'Double C', rule: 'Remember: two C\'s but only one L', category: 'double-letters' },
+    { word: 'committee', hint: 'A group that makes decisions', tricky: [2,3,4,5,6,7], pattern: 'Double M, T, and E', rule: 'Three sets of doubles: mm, tt, ee', category: 'double-letters' },
+    { word: 'believe', hint: 'To think something is true', tricky: [3,4], pattern: 'I before E', rule: '"i" before "e" after "l"', category: 'ie-ei' },
+    { word: 'receive', hint: 'To get something', tricky: [3,4], pattern: 'E before I', rule: '"e" before "i" after "c"', category: 'ie-ei' },
+    { word: 'weird', hint: 'Strange or unusual', tricky: [1,2], pattern: 'E before I', rule: '"weird" breaks the "i before e" rule!', category: 'ie-ei' },
+    { word: 'friend', hint: 'Someone you like to play with', tricky: [2,3], pattern: 'I before E', rule: '"i" before "e" \u2014 a friend to the end!', category: 'ie-ei' },
+    { word: 'phone', hint: 'You call people on it', tricky: [0,1], pattern: 'PH = F sound', rule: '"ph" makes an "f" sound', category: 'ph-f' },
+    { word: 'elephant', hint: 'The biggest land animal', tricky: [4,5], pattern: 'PH = F sound', rule: '"ph" makes an "f" sound', category: 'ph-f' },
+    { word: 'dolphin', hint: 'A smart animal in the ocean', tricky: [4,5], pattern: 'PH = F sound', rule: '"ph" makes an "f" sound', category: 'ph-f' },
+    { word: 'because', hint: 'It gives a reason why', tricky: [3,4,5,6], pattern: 'Tricky ending', rule: 'Sounds like "cuz" but spelled "cause"', category: 'other' },
+    { word: 'said', hint: 'Past tense of say', tricky: [1,2], pattern: 'AI = "eh"', rule: '"ai" sounds like "eh" not "ay" here', category: 'other' },
+    { word: 'does', hint: 'He ___ his homework', tricky: [1,2], pattern: 'OE = "uh"', rule: '"oe" sounds like "uh" not "oh" here', category: 'other' },
+    { word: 'people', hint: 'Human beings', tricky: [1,2], pattern: 'EO = "ee"', rule: '"eo" sounds like "ee" here', category: 'other' },
+    { word: 'beautiful', hint: 'Very pretty', tricky: [0,1,2,3], pattern: 'BEAU = "byoo"', rule: '"beau" comes from French, sounds like "byoo"', category: 'other' },
+    { word: 'Wednesday', hint: 'The day in the middle of the week', tricky: [3,4,5], pattern: 'Silent D+N', rule: 'We say "Wenz-day" but spell it Wed-nes-day', category: 'other' },
+    { word: 'February', hint: 'The second month of the year', tricky: [3], pattern: 'Silent R', rule: 'The first "r" is often skipped when speaking', category: 'other' },
+    { word: 'library', hint: 'A place full of books', tricky: [3], pattern: 'Two R\'s', rule: 'Don\'t forget the first "r" \u2014 it\'s lib-ra-ry', category: 'other' },
+    { word: 'tongue', hint: 'It is inside your mouth', tricky: [3,4,5], pattern: 'Silent UE', rule: 'Ends with silent "ue"', category: 'other' },
+    { word: 'queue', hint: 'A line of people waiting', tricky: [1,2,3,4], pattern: 'UEUE = silent', rule: 'Only the "q" makes a sound \u2014 four silent letters!', category: 'other' },
+    { word: 'colonel', hint: 'A high-ranking soldier', tricky: [0,1,2,3,4,5,6], pattern: 'Sounds nothing like it looks!', rule: 'Spelled "colonel" but sounds like "kernel"', category: 'other' },
+    { word: 'rhythm', hint: 'The beat in music', tricky: [0,2,3,4,5], pattern: 'No vowels!', rule: 'Uses "y" as its only vowel \u2014 no a, e, i, o, u!', category: 'other' },
+  ]
+};
+
+const ROUNDS_PER_GAME = 10;
+const SR_STORAGE_KEY = 'spelling-bee-sr';
+
+let state = {
+  level: null, trickyCategory: null, words: [], currentIndex: 0,
+  score: 0, results: [], hintsUsed: 0, trickyRevealed: false,
+};
+
+function loadSR() { try { return JSON.parse(localStorage.getItem(SR_STORAGE_KEY)) || {}; } catch { return {}; } }
+function saveSR(data) { localStorage.setItem(SR_STORAGE_KEY, JSON.stringify(data)); }
+
+function recordResult(word, isCorrect) {
+  const sr = loadSR();
+  if (!sr[word]) sr[word] = { attempts: 0, correct: 0, lastSeen: 0, streak: 0 };
+  sr[word].attempts++;
+  sr[word].lastSeen = Date.now();
+  if (isCorrect) { sr[word].correct++; sr[word].streak++; } else { sr[word].streak = 0; }
+  saveSR(sr);
+}
+
+function getWordMastery(word) {
+  const sr = loadSR(); const data = sr[word];
+  if (!data || data.attempts === 0) return 'new';
+  const ratio = data.correct / data.attempts;
+  if (data.streak >= 3 && ratio >= 0.8) return 'mastered';
+  if (ratio >= 0.5) return 'learning';
+  return 'struggling';
+}
+
+function getWeakWords() {
+  const sr = loadSR(); const allWords = getAllWordItems(); const weak = [];
+  for (const item of allWords) {
+    const data = sr[item.word];
+    if (data && data.attempts > 0) {
+      const ratio = data.correct / data.attempts;
+      if (ratio < 0.7 || data.streak === 0) weak.push({ ...item, srScore: ratio, srStreak: data.streak, srAttempts: data.attempts });
+    }
+  }
+  weak.sort((a, b) => a.srScore - b.srScore || a.srStreak - b.srStreak);
+  return weak;
+}
+
+function getAllWordItems() {
+  const all = [];
+  for (const level of Object.keys(WORDS)) for (const item of WORDS[level]) all.push({ ...item, sourceLevel: level });
+  return all;
+}
+
+function getWeakWordCount() { return getWeakWords().length; }
+
+function weightedShuffle(words) {
+  const sr = loadSR();
+  const scored = words.map(w => {
+    const data = sr[w.word]; let weight = 1;
+    if (data && data.attempts > 0) {
+      const ratio = data.correct / data.attempts; weight = 2 - ratio;
+      if (data.streak === 0) weight += 0.5;
+      if (Date.now() - data.lastSeen > 86400000) weight += 0.3;
+    } else { weight = 1.3; }
+    return { item: w, weight, rand: Math.random() * weight };
+  });
+  scored.sort((a, b) => b.rand - a.rand);
+  return scored.map(s => s.item);
+}
+
+const titleScreen = document.getElementById('title-screen');
+const gameScreen = document.getElementById('game-screen');
+const resultsScreen = document.getElementById('results-screen');
+const trickyMenuScreen = document.getElementById('tricky-menu-screen');
+const scoreDisplay = document.getElementById('score-display');
+const progressFill = document.getElementById('progress-fill');
+const listenBtn = document.getElementById('listen-btn');
+const hintText = document.getElementById('hint-text');
+const letterInputArea = document.getElementById('letter-input-area');
+const checkBtn = document.getElementById('check-btn');
+const hintBtn = document.getElementById('hint-btn');
+
+function showScreen(screen) {
+  titleScreen.style.display = 'none'; gameScreen.style.display = 'none';
+  resultsScreen.style.display = 'none'; trickyMenuScreen.style.display = 'none';
+  screen.style.display = 'block';
+}
+
+function updateTitleScreen() {
+  const weakCount = getWeakWordCount(); const weakBtn = document.getElementById('weak-words-btn');
+  if (weakCount > 0) { weakBtn.style.display = 'block'; weakBtn.querySelector('.weak-count').textContent = weakCount; }
+  else { weakBtn.style.display = 'none'; }
+}
+
+function showTrickyMenu() {
+  showScreen(trickyMenuScreen);
+  const container = document.getElementById('tricky-category-list'); container.innerHTML = '';
+  const allBtn = document.createElement('button'); allBtn.className = 'category-btn';
+  allBtn.onclick = () => startTrickyGame(null);
+  allBtn.innerHTML = `<span class="cat-icon">\u2728</span><span class="cat-info"><span class="cat-name">All Tricky Words</span><span class="cat-count">${WORDS.tricky.length} words</span></span><span class="cat-mastery">${getMasteryBar(WORDS.tricky)}</span>`;
+  container.appendChild(allBtn);
+  for (const [key, cat] of Object.entries(TRICKY_CATEGORIES)) {
+    const words = WORDS.tricky.filter(w => w.category === key); if (words.length === 0) continue;
+    const btn = document.createElement('button'); btn.className = 'category-btn';
+    btn.onclick = () => startTrickyGame(key);
+    btn.innerHTML = `<span class="cat-icon">${cat.icon}</span><span class="cat-info"><span class="cat-name">${cat.name}</span><span class="cat-count">${words.length} words</span></span><span class="cat-mastery">${getMasteryBar(words)}</span>`;
+    container.appendChild(btn);
+  }
+}
+
+function getMasteryBar(words) {
+  let mastered = 0, learning = 0, struggling = 0;
+  for (const w of words) { const m = getWordMastery(w.word); if (m === 'mastered') mastered++; else if (m === 'learning') learning++; else if (m === 'struggling') struggling++; }
+  const total = words.length; if (total === 0) return '';
+  return `<span class="mastery-bar"><span class="mastery-fill mastery-mastered" style="width:${(mastered/total*100).toFixed(0)}%"></span><span class="mastery-fill mastery-learning" style="width:${(learning/total*100).toFixed(0)}%"></span><span class="mastery-fill mastery-struggling" style="width:${(struggling/total*100).toFixed(0)}%"></span></span><span class="mastery-label">${mastered}/${total}</span>`;
+}
+
+function startTrickyGame(categoryKey) {
+  state.level = 'tricky'; state.trickyCategory = categoryKey; state.score = 0; state.currentIndex = 0; state.results = []; state.hintsUsed = 0;
+  let pool = categoryKey ? WORDS.tricky.filter(w => w.category === categoryKey) : [...WORDS.tricky];
+  state.words = weightedShuffle(pool).slice(0, Math.min(ROUNDS_PER_GAME, pool.length));
+  showScreen(gameScreen); loadWord();
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text); u.rate = 0.85; u.pitch = 1.1; u.lang = 'en-US';
+  window.speechSynthesis.speak(u);
+}
+
+function startGame(level) {
+  if (level === 'tricky') { showTrickyMenu(); return; }
+  if (level === 'weak') { startWeakWordsGame(); return; }
+  state.level = level; state.trickyCategory = null; state.score = 0; state.currentIndex = 0; state.results = []; state.hintsUsed = 0;
+  state.words = weightedShuffle([...WORDS[level]]).slice(0, ROUNDS_PER_GAME);
+  showScreen(gameScreen); loadWord();
+}
+
+function startWeakWordsGame() {
+  const weak = getWeakWords(); if (weak.length === 0) return;
+  state.level = 'weak'; state.trickyCategory = null; state.score = 0; state.currentIndex = 0; state.results = []; state.hintsUsed = 0;
+  state.words = weak.slice(0, Math.min(ROUNDS_PER_GAME, weak.length));
+  showScreen(gameScreen); loadWord();
+}
+
+function loadWord() {
+  const item = state.words[state.currentIndex]; const word = item.word;
+  const isTricky = state.level === 'tricky' || state.level === 'weak';
+  scoreDisplay.textContent = `Score: ${state.score} / ${state.words.length}`;
+  progressFill.style.width = `${(state.currentIndex / state.words.length) * 100}%`;
+  hintText.textContent = ''; state.trickyRevealed = false;
+  const patternBadge = document.getElementById('pattern-badge');
+  const trickyBtnEl = document.getElementById('tricky-btn');
+  if (isTricky && item.pattern) { patternBadge.textContent = item.pattern; patternBadge.style.display = 'inline-block'; trickyBtnEl.style.display = 'block'; }
+  else { patternBadge.style.display = 'none'; trickyBtnEl.style.display = 'none'; }
+  const masteryIndicator = document.getElementById('mastery-indicator');
+  const mastery = getWordMastery(word);
+  const mc = { 'new': { text: 'New', class: 'mastery-new' }, 'struggling': { text: 'Needs Practice', class: 'mastery-struggling-badge' }, 'learning': { text: 'Learning', class: 'mastery-learning-badge' }, 'mastered': { text: 'Mastered', class: 'mastery-mastered-badge' } }[mastery];
+  masteryIndicator.textContent = mc.text; masteryIndicator.className = 'mastery-indicator ' + mc.class;
+  letterInputArea.innerHTML = '';
+  for (let i = 0; i < word.length; i++) {
+    const input = document.createElement('input'); input.type = 'text'; input.maxLength = 1; input.className = 'letter-box';
+    if (isTricky && item.tricky && item.tricky.includes(i)) input.classList.add('tricky-letter');
+    input.setAttribute('autocapitalize', 'none'); input.setAttribute('autocorrect', 'off');
+    input.setAttribute('autocomplete', 'off'); input.setAttribute('spellcheck', 'false');
+    input.setAttribute('data-index', i);
+    input.addEventListener('input', onLetterInput); input.addEventListener('keydown', onLetterKeydown);
+    letterInputArea.appendChild(input);
+  }
+  letterInputArea.querySelector('.letter-box').focus();
+  setTimeout(() => speak(word), 400);
+  checkBtn.disabled = false;
+}
+
+function onLetterInput(e) {
+  if (e.target.value.length === 1) {
+    const idx = parseInt(e.target.dataset.index); const boxes = letterInputArea.querySelectorAll('.letter-box');
+    if (idx < boxes.length - 1) boxes[idx + 1].focus();
+  }
+}
+
+function onLetterKeydown(e) {
+  const idx = parseInt(e.target.dataset.index); const boxes = letterInputArea.querySelectorAll('.letter-box');
+  if (e.key === 'Backspace' && e.target.value === '' && idx > 0) { boxes[idx-1].focus(); boxes[idx-1].value = ''; e.preventDefault(); }
+  else if (e.key === 'Enter') checkSpelling();
+}
+
+function checkSpelling() {
+  const item = state.words[state.currentIndex]; const word = item.word;
+  const boxes = letterInputArea.querySelectorAll('.letter-box');
+  const isTricky = state.level === 'tricky' || state.level === 'weak';
+  let answer = ''; boxes.forEach(b => { answer += b.value.toLowerCase(); });
+  const isCorrect = answer === word.toLowerCase();
+  boxes.forEach((box, i) => {
+    setTimeout(() => {
+      const ok = box.value.toLowerCase() === word[i].toLowerCase();
+      box.classList.add(ok ? 'correct' : 'wrong');
+      if (isTricky && item.tricky && item.tricky.includes(i) && ok) box.classList.add('tricky-highlight-correct');
+    }, i * 80);
+  });
+  recordResult(word, isCorrect);
+  state.results.push({ word, answer, correct: isCorrect, pattern: item.pattern || null, rule: item.rule || null, tricky: item.tricky || null });
+  if (isCorrect) state.score++;
+  checkBtn.disabled = true;
+  setTimeout(() => showFeedback(isCorrect, word), boxes.length * 80 + 400);
+}
+
+function showFeedback(isCorrect, word) {
+  const item = state.words[state.currentIndex];
+  const isTricky = state.level === 'tricky' || state.level === 'weak';
+  const feedback = document.createElement('div');
+  feedback.className = `feedback ${isCorrect ? 'correct-feedback' : 'wrong-feedback'}`;
+  const emoji = isCorrect ? ['Amazing!','Super!','Great job!','Awesome!','Fantastic!'][Math.floor(Math.random()*5)] : 'Oops!';
+  const emojiIcon = isCorrect ? ['star','tada','sparkles','rainbow','trophy'][Math.floor(Math.random()*5)] : 'thinking';
+  const emojiMap = { star:'\u2B50', tada:'\uD83C\uDF89', sparkles:'\u2728', rainbow:'\uD83C\uDF08', trophy:'\uD83C\uDFC6', thinking:'\uD83E\uDD14' };
+  let wordHtml = '';
+  if (isTricky && item.tricky) { for (let i = 0; i < word.length; i++) { wordHtml += item.tricky.includes(i) ? `<span class="feedback-tricky-letter">${word[i]}</span>` : word[i]; } }
+  else { wordHtml = word; }
+  let ruleHtml = isTricky && item.rule ? `<div class="feedback-rule">${item.rule}</div>` : '';
+  const sr = loadSR(); const srData = sr[word];
+  let streakHtml = isCorrect && srData && srData.streak >= 2 ? `<div class="feedback-streak">${srData.streak} in a row!</div>` : '';
+  feedback.innerHTML = `<div class="feedback-emoji">${emojiMap[emojiIcon]}</div><div class="feedback-text">${emoji}</div><div class="feedback-word">${wordHtml}</div>${streakHtml}${ruleHtml}<button class="feedback-continue" onclick="this.parentElement.remove(); nextWord();">${state.currentIndex < state.words.length - 1 ? 'Next Word' : 'See Results'}</button>`;
+  document.body.appendChild(feedback);
+  if (isCorrect) { speak('Correct!'); } else { speak(`The correct spelling is ${word.split('').join(', ')}${isTricky && item.rule ? '. Remember: ' + item.rule : ''}`); }
+}
+
+function nextWord() { state.currentIndex++; if (state.currentIndex >= state.words.length) showResults(); else loadWord(); }
+
+function showHint() {
+  const item = state.words[state.currentIndex];
+  const isTricky = state.level === 'tricky' || state.level === 'weak';
+  if (isTricky && item.rule) hintText.innerHTML = `${item.hint}<br><span class="rule-hint">${item.rule}</span>`;
+  else hintText.textContent = item.hint;
+  state.hintsUsed++;
+}
+
+function showTrickyLetters() {
+  const item = state.words[state.currentIndex]; if (!item.tricky) return;
+  state.trickyRevealed = true; const boxes = letterInputArea.querySelectorAll('.letter-box');
+  item.tricky.forEach(idx => { boxes[idx].value = item.word[idx]; boxes[idx].classList.add('tricky-revealed'); boxes[idx].readOnly = true; });
+  for (const box of boxes) { if (!box.value) { box.focus(); break; } }
+}
+
+function showResults() {
+  showScreen(resultsScreen);
+  const pct = Math.round((state.score / state.words.length) * 100);
+  const correct = state.results.filter(r => r.correct).length;
+  const wrong = state.results.filter(r => !r.correct).length;
+  let emoji, message;
+  if (pct === 100) { emoji = '\uD83C\uDFC6'; message = 'Perfect score! You are a spelling champion!'; }
+  else if (pct >= 80) { emoji = '\u2B50'; message = 'Amazing work! Almost perfect!'; }
+  else if (pct >= 60) { emoji = '\uD83D\uDE0A'; message = 'Good job! Keep practicing!'; }
+  else { emoji = '\uD83D\uDCAA'; message = 'Nice try! Practice makes perfect!'; }
+  document.getElementById('results-emoji').textContent = emoji;
+  document.getElementById('results-title').textContent = pct === 100 ? 'Perfect!' : pct >= 80 ? 'Great Job!' : pct >= 60 ? 'Good Work!' : 'Keep Going!';
+  document.getElementById('results-score').textContent = `${state.score} / ${state.words.length}`;
+  document.getElementById('results-message').textContent = message;
+  document.getElementById('correct-count').textContent = correct;
+  document.getElementById('wrong-count').textContent = wrong;
+  const missedContainer = document.getElementById('missed-words');
+  const missed = state.results.filter(r => !r.correct);
+  if (missed.length > 0) {
+    missedContainer.style.display = 'block';
+    const list = document.getElementById('missed-list'); list.innerHTML = '';
+    missed.forEach(m => {
+      const div = document.createElement('div'); div.className = 'missed-word-item';
+      let patternHtml = m.pattern ? `<div class="missed-pattern">${m.pattern}</div>` : '';
+      let correctHtml = m.word;
+      if (m.tricky) { correctHtml = ''; for (let i = 0; i < m.word.length; i++) correctHtml += m.tricky.includes(i) ? `<span class="tricky-highlight">${m.word[i]}</span>` : m.word[i]; }
+      div.innerHTML = `<div><span>You typed: <strong>${m.answer || '(empty)'}</strong></span>${patternHtml}</div><span class="correct-spelling">${correctHtml}</span>`;
+      list.appendChild(div);
+    });
+  } else { missedContainer.style.display = 'none'; }
+  const masterySummary = document.getElementById('mastery-summary');
+  const sr = loadSR(); const totalTracked = Object.keys(sr).length;
+  const masteredCount = Object.values(sr).filter(d => d.streak >= 3 && d.correct / d.attempts >= 0.8).length;
+  if (totalTracked > 0) {
+    masterySummary.style.display = 'block';
+    masterySummary.innerHTML = `<div class="mastery-summary-bar"><span class="mastery-fill mastery-mastered" style="width:${(masteredCount/totalTracked*100).toFixed(0)}%"></span></div><p class="mastery-summary-text">${masteredCount} of ${totalTracked} words mastered overall</p>`;
+  } else { masterySummary.style.display = 'none'; }
+}
+
+function goHome() { updateTitleScreen(); showScreen(titleScreen); }
+
+function resetProgress() {
+  if (confirm('This will erase all your progress. Are you sure?')) { localStorage.removeItem(SR_STORAGE_KEY); updateTitleScreen(); }
+}
+
+listenBtn.addEventListener('click', () => { speak(state.words[state.currentIndex].word); listenBtn.style.transform = 'scale(0.9)'; setTimeout(() => { listenBtn.style.transform = ''; }, 150); });
+checkBtn.addEventListener('click', checkSpelling);
+hintBtn.addEventListener('click', showHint);
+
+updateTitleScreen();
+  </script>
+</body>
+</html>
